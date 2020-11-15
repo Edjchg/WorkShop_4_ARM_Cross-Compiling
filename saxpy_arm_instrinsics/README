@@ -6,4 +6,4 @@ $ /opt/android-ndk-r20/ndk-build
 #Connect an Android device and able the development mode when plug into your computer
 $ adb push ../libs/armeabi-v7a/saxpy /data/local/tmp
 $ adb shell /data/local/tmp/saxpy
-
+For executing each example, in the main function you are going to see commented code, just de-comment the code for it to execute, you can see the euler test, summatory and vectorial tests
