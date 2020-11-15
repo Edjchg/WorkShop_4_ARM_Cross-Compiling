@@ -1,0 +1,9 @@
+For cross-compiling saxpy:
+
+Inside jni file execute the following commands:
+
+$ /opt/android-ndk-r20/ndk-build 
+#Connect an Android device and able the development mode when plug into your computer
+$ adb push ../libs/armeabi-v7a/saxpy /data/local/tmp
+$ adb shell /data/local/tmp/saxpy
+
