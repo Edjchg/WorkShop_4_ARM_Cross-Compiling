@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <omp.h>
 #include <time.h>
-
+#include <math.h>
 void calculate_saxpy(int a_constant, uint8x16_t *x_vector, uint8x16_t *y_vector, uint8x16_t *s_vector){
     //const uint8_t uint8_data[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
     
@@ -34,9 +34,8 @@ void print_uint8 (uint8x16_t data, char* name) {
     printf ("\n");
 }
 
-
-int main(int argc, char* argv[]){
-    //const uint8_t x_data[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; //x
+void testSaxpy(){
+//const uint8_t x_data[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; //x
     //const uint8_t y_data[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; //y
     //const uint8_t s_data[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0 };; //s
     uint8_t x_data[16000];
@@ -180,5 +179,145 @@ int main(int argc, char* argv[]){
     t3 = clock() - t3;
     double tiempo_tomado3 = ((double)t3)/CLOCKS_PER_SEC;
     printf("\033[1;31m El programa duró %f, con %i elementos.\033[0m; \n", tiempo_tomado3, 160);
-    
+}
+
+double evaluateFunction( double  x){
+    return (double ) 4*x*x*x + sin((double )x)*cos((double )x)-x*x;
+
+}
+
+
+double calculateIntegral(int subdivisions, int initX,int finalX){
+    double start_time = omp_get_wtime();
+
+    double sum = 0;
+    double differential = (double ) (finalX-initX)/subdivisions;
+#pragma omp parallel
+    {
+#pragma omp for reduction(+:sum)
+        for (int i = initX; i < finalX; ++i) {
+            double resum = (double)i;
+            while (resum<i+1){
+                sum+= differential*evaluateFunction((double ) (resum+(resum+differential)/2));
+                resum+=differential;
+            }
+        }
+    }
+    double finishtime = omp_get_wtime() - start_time;
+    printf(" La sumatoria tardo aproximadamente %lf con un resultado de %lf",finishtime,sum);
+    return sum;
+}
+void euler_serial(int iterations) {
+    double start_time = omp_get_wtime();
+    double e;
+    double * a = malloc(sizeof(double )*iterations);
+    a[0] = 1.0;
+    for (int i = 1; i < iterations; i++)
+    {
+        a[i] = a[i-1] / i;
+    }
+    e = 1.;
+    for (int i = iterations - 1; i > 0; i--)
+        e += a[i];
+
+    double finishtime = omp_get_wtime() - start_time;
+    printf("Se tardo: %lf", finishtime);
+    printf("Euler constant e = %.16lf\n", e);
+    free(a);
+}
+void euler_parallel(int iterations) {
+    double start_time = omp_get_wtime();
+    double e;
+    double * a = malloc(sizeof(double )*iterations);
+    e = 1.;
+    a[0] = 1.0;
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 1; i < iterations; i++)
+        {
+            a[i] = a[i-1] / i;
+        }
+
+#pragma omp for reduction(+:e)
+        for (int i = iterations - 1; i > 0; i--)
+            e += a[i];
+    }
+    double finishtime = omp_get_wtime() - start_time;
+    printf("Se tardo: %lf", finishtime);
+    printf("Euler constant e = %.16lf\n", e);
+    free(a);
+}
+
+int main(int argc, char* argv[]){
+    //__________Pruebas generales, descomentar para ejecutarlas_______________//
+    // omp_set_num_threads(6);
+    // printf("_______Saxpy test______\n");
+    // testSaxpy();
+    // printf("\n _______Saxpy test Final______\n");
+    // printf("_______Init euler serial________\n");
+    // euler_serial(100000);
+    // printf("\n _______Fin euler serial______\n");
+    // printf("_______Init euler parallel_______\n");
+    // euler_parallel(100000);
+    // printf("\n _______Fin euler parallel_______\n");
+    // printf("_______Init calculo integral_______\n");
+    // calculateIntegral(1000000000,1,100);
+    // printf("\n _______Fin calculo integral_______\n");
+    // printf("_______Init calculo integral serial_______\n");
+    // omp_set_num_threads(1);
+    // calculateIntegral(1000000000,1,100);
+    // printf("\n_______Fin calculo integral serial_______\n");
+
+    //__________Pruebas de euler tanto serial como paralelo, descomentar para ejecutarlas_______________//
+    // printf("\nEjecucion en serial 1000000\n");
+    // euler_serial(1000000);
+    // printf("\n 2000000\n");
+    // euler_serial(2000000);
+    // printf("\n3000000 \n");
+    // euler_serial(3000000);
+    // printf("\n 4000000 \n");
+    // euler_serial(4000000);
+    // printf("\n 5000000 \n");
+    // euler_serial(5000000);
+    // printf("\n6000000 \n");
+    // euler_serial(6000000);
+    // printf("\n Paralelo 1000000 \n");
+    // euler_parallel(1000000);
+    // printf("\n 2000000\n");
+    // euler_parallel(2000000);
+    // printf("\n3000000 \n");
+    // euler_parallel(3000000);
+    // printf("\n 4000000 \n");
+    // euler_parallel(4000000);
+    // printf("\n 5000000 \n");
+    // euler_parallel(5000000);
+    // printf("\n6000000 \n");
+    // euler_parallel(600000);
+
+    //__________Pruebas de integral tanto serial como paralelo, descomentar para ejecutarlas_______________//
+
+printf("\n Ejecucion de calculo de integral 1 hilo(serial)\n");
+    omp_set_num_threads(1);
+calculateIntegral(1000000000,1,100);
+printf("\n Ejecucion de calculo de integral 2 hilos\n");
+
+    omp_set_num_threads(2);
+calculateIntegral(1000000000,1,100);
+printf("\n Ejecucion de calculo de integral 3 hilos\n");
+    omp_set_num_threads(3);
+    calculateIntegral(1000000000,1,100);
+printf("\n Ejecucion de calculo de integral 4 hilos\n");
+    omp_set_num_threads(4);
+    calculateIntegral(1000000000,1,100);
+printf("\n Ejecucion de calculo de integral 5 hilos\n");
+
+
+    omp_set_num_threads(5);
+calculateIntegral(1000000000,1,100);
+printf("\n Ejecucion de calculo de integral 6 hilos\n");
+
+    omp_set_num_threads(6);
+calculateIntegral(1000000000,1,100);
+
 }
