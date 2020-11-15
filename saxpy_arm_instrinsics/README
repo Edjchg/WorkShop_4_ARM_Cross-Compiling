@@ -1,4 +1,4 @@
-For cross-compiling saxpy:
+For cross-compiling saxpy In Ubuntu:
 
 Inside jni file execute the following commands:
 

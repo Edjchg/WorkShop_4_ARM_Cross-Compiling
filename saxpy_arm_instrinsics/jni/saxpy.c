@@ -90,7 +90,7 @@ void testSaxpy(){
     t = clock();
 
     #pragma omp for 
-    for (int i = 0; i < 1000; i+=16)
+    for (int i = 0; i < 16000; i+=16)
     {
         //Convert slices of the main vectors in to smaller vectors:
         uint8_t x_data_inside[] = {x_data[i], x_data[i+1], x_data[i+2], x_data[i+3], x_data[i+4], x_data[i+5], x_data[i+6], x_data[i+7], x_data[i+8], x_data[i+9], x_data[i+10], x_data[i+11], x_data[i+12], x_data[i+13], x_data[i+14], x_data[i+15]};
@@ -122,7 +122,7 @@ void testSaxpy(){
     t2 = clock();
 
     #pragma omp for 
-    for (int i = 0; i < 100; i+=16)
+    for (int i = 0; i < 1600; i+=16)
     {
         //Convert slices of the main vectors in to smaller vectors:
         uint8_t x_data_inside[] = {x_data_l[i], x_data_l[i+1], x_data_l[i+2], x_data_l[i+3], x_data_l[i+4], x_data_l[i+5], x_data_l[i+6], x_data_l[i+7], x_data_l[i+8], x_data_l[i+9], x_data_l[i+10], x_data_l[i+11], x_data_l[i+12], x_data_l[i+13], x_data_l[i+14], x_data_l[i+15]};
@@ -152,7 +152,7 @@ void testSaxpy(){
     t3 = clock() -t3;
 
     #pragma omp for 
-    for (int i = 0; i < 10; i+=16)
+    for (int i = 0; i < 160; i+=16)
     {
         //Convert slices of the main vectors in to smaller vectors:
         uint8_t x_data_inside[] = {x_data_ll[i], x_data_ll[i+1], x_data_ll[i+2], x_data_ll[i+3], x_data_ll[i+4], x_data_ll[i+5], x_data_ll[i+6], x_data_ll[i+7], x_data_ll[i+8], x_data_ll[i+9], x_data_ll[i+10], x_data_ll[i+11], x_data_ll[i+12], x_data_ll[i+13], x_data_ll[i+14], x_data_ll[i+15]};
